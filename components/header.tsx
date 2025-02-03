@@ -56,7 +56,7 @@ export default function Header() {
             <div className="hidden md:block">
               <Search />
             </div>
-            <ThemeToggle className="ml-4" />
+            <ThemeToggle />
             <div className="md:hidden">
               <Button
                 variant="ghost"
