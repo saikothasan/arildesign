@@ -5,6 +5,23 @@ import matter from "gray-matter"
 
 const postsDirectory = path.join(process.cwd(), "content/posts")
 
+interface PostFrontmatter {
+  title: string
+  date: string
+  category: string
+  excerpt: string
+  author: {
+    name: string
+    image: string
+  }
+  image: string
+}
+
+interface Post extends PostFrontmatter {
+  slug: string
+  content?: string
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const category = searchParams.get("category")
@@ -21,27 +38,28 @@ export async function GET(request: Request) {
           const { data, content } = matter(fileContents)
           return {
             slug: fileName.replace(/\.md$/, ""),
-            ...data,
+            ...(data as PostFrontmatter),
             content: slug ? content : undefined,
           }
         }),
     )
 
     // Sort posts by date in descending order
-    posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    const sortedPosts = posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-    let filteredPosts = posts
+    let filteredPosts = sortedPosts
 
     if (category) {
-      filteredPosts = posts.filter((post) => post.category.toLowerCase() === category.toLowerCase())
+      filteredPosts = sortedPosts.filter((post) => post.category.toLowerCase() === category.toLowerCase())
     }
 
     if (slug) {
-      filteredPosts = posts.find((post) => post.slug === slug)
+      filteredPosts = sortedPosts.find((post) => post.slug === slug)
     }
 
     return NextResponse.json(filteredPosts)
   } catch (error) {
+    console.error("Error fetching posts:", error)
     return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 })
   }
 }
