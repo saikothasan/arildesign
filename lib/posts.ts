@@ -4,18 +4,21 @@ import matter from "gray-matter"
 
 const postsDirectory = path.join(process.cwd(), "content/posts")
 
-export interface Post {
-  slug: string
+export interface PostFrontmatter {
   title: string
   date: string
   category: string
   excerpt: string
-  content: string
   author: {
     name: string
     image: string
   }
   image: string
+}
+
+export interface Post extends PostFrontmatter {
+  slug: string
+  content: string
 }
 
 export function getAllPosts(): Post[] {
@@ -30,17 +33,12 @@ export function getAllPosts(): Post[] {
 
       return {
         slug,
-        title: data.title,
-        date: data.date,
-        category: data.category,
-        excerpt: data.excerpt,
+        ...(data as PostFrontmatter),
         content,
-        author: data.author,
-        image: data.image,
       }
     })
 
-  return allPosts.sort((a, b) => (a.date < b.date ? 1 : -1))
+  return allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
 
 export function getPostBySlug(slug: string): Post | undefined {
@@ -51,13 +49,8 @@ export function getPostBySlug(slug: string): Post | undefined {
 
     return {
       slug,
-      title: data.title,
-      date: data.date,
-      category: data.category,
-      excerpt: data.excerpt,
+      ...(data as PostFrontmatter),
       content,
-      author: data.author,
-      image: data.image,
     }
   } catch {
     return undefined
