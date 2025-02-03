@@ -1,11 +1,14 @@
 import { ArticleCard } from "@/components/article-card"
 import { Sidebar } from "@/components/sidebar"
 import { Pagination } from "@/components/pagination"
+import type { Post } from "@/lib/posts" // Import the Post interface
 
-async function getPosts() {
+async function getPosts(): Promise<Post[]> {
   const protocol = process.env.NODE_ENV === "production" ? "https" : "http"
   const host = process.env.NEXT_PUBLIC_VERCEL_URL || "localhost:3000"
-  const res = await fetch(`${protocol}://${host}/api/posts`)
+  const res = await fetch(`${protocol}://${host}/api/posts`, {
+    next: { revalidate: 3600 }, // Revalidate every hour
+  })
   if (!res.ok) {
     throw new Error("Failed to fetch posts")
   }
@@ -29,7 +32,7 @@ export default async function Home({
       <div className="lg:col-span-2 xl:col-span-3">
         <h1 className="text-3xl font-bold mb-8">Latest Articles</h1>
         <div className="grid gap-8 md:grid-cols-2">
-          {paginatedPosts.map((post) => (
+          {paginatedPosts.map((post: Post) => (
             <ArticleCard key={post.slug} {...post} />
           ))}
         </div>
