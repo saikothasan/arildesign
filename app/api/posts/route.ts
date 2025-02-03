@@ -54,7 +54,8 @@ export async function GET(request: Request) {
     }
 
     if (slug) {
-      filteredPosts = sortedPosts.find((post) => post.slug === slug)
+      const foundPost = sortedPosts.find((post) => post.slug === slug)
+      filteredPosts = foundPost ? [foundPost] : []
     }
 
     return NextResponse.json(filteredPosts)
