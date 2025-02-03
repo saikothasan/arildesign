@@ -5,8 +5,8 @@ import { useTheme } from "next-themes"
 
 declare global {
   interface Window {
-    DISQUS: any
-    disqus_config: any
+    DISQUS?: any
+    disqus_config?: any
   }
 }
 
@@ -22,7 +22,8 @@ export function Comments({ slug }: CommentsProps) {
     script.src = "https://your-disqus-shortname.disqus.com/embed.js"
     script.setAttribute("data-timestamp", Date.now().toString())
 
-    window.disqus_config = function () {
+    window.disqus_config = function (this: any) {
+      this.page = this.page || {}
       this.page.url = window.location.href
       this.page.identifier = slug
     }
@@ -38,9 +39,10 @@ export function Comments({ slug }: CommentsProps) {
     if (window.DISQUS) {
       window.DISQUS.reset({
         reload: true,
-        config: function () {
-          this.page.identifier = slug
+        config: function (this: any) {
+          this.page = this.page || {}
           this.page.url = window.location.href
+          this.page.identifier = slug
         },
       })
     }
