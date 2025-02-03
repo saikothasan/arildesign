@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server"
 import RSS from "rss"
+import type { Post } from "@/lib/posts" // Import the Post interface
 
-async function getPosts() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || "http://localhost:3000"}/api/posts`)
+async function getPosts(): Promise<Post[]> {
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http"
+  const host = process.env.NEXT_PUBLIC_VERCEL_URL || "localhost:3000"
+  const res = await fetch(`${protocol}://${host}/api/posts`)
   if (!res.ok) {
     throw new Error("Failed to fetch posts")
   }
@@ -21,12 +24,13 @@ export async function GET(request: Request) {
     site_url: siteUrl,
   })
 
-  posts.forEach((post) => {
+  posts.forEach((post: Post) => {
     feed.item({
       title: post.title,
       description: post.excerpt,
       url: `${siteUrl}/posts/${post.slug}`,
       date: post.date,
+      author: post.author.name,
     })
   })
 
