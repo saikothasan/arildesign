@@ -13,7 +13,7 @@ export function Markdown({ content }: MarkdownProps) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        code({ node, inline, className, children, ...props }) {
+        code({ node, inline, className, children, ...props }: any) {
           const match = /language-(\w+)/.exec(className || "")
           return !inline && match ? (
             <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div" {...props}>
@@ -25,7 +25,7 @@ export function Markdown({ content }: MarkdownProps) {
             </code>
           )
         },
-        img: (props) => (
+        img: (props: any) => (
           <Image src={props.src || ""} alt={props.alt || ""} width={700} height={400} className="rounded-lg" />
         ),
       }}
