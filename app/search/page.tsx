@@ -1,16 +1,19 @@
 import { ArticleCard } from "@/components/article-card"
 import { Sidebar } from "@/components/sidebar"
+import type { Post } from "@/lib/posts" // Import the Post interface
 
-async function searchPosts(query: string) {
+async function searchPosts(query: string): Promise<Post[]> {
   const protocol = process.env.NODE_ENV === "production" ? "https" : "http"
   const host = process.env.NEXT_PUBLIC_VERCEL_URL || "localhost:3000"
-  const res = await fetch(`${protocol}://${host}/api/posts`)
+  const res = await fetch(`${protocol}://${host}/api/posts`, {
+    next: { revalidate: 3600 }, // Revalidate every hour
+  })
   if (!res.ok) {
     throw new Error("Failed to fetch posts")
   }
-  const posts = await res.json()
+  const posts: Post[] = await res.json()
   return posts.filter(
-    (post) =>
+    (post: Post) =>
       post.title.toLowerCase().includes(query.toLowerCase()) ||
       post.content.toLowerCase().includes(query.toLowerCase()),
   )
@@ -28,7 +31,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q: 
           <p>No results found.</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
-            {posts.map((post) => (
+            {posts.map((post: Post) => (
               <ArticleCard key={post.slug} {...post} />
             ))}
           </div>
